@@ -4,8 +4,9 @@ import { IoClose } from 'react-icons/io5';
 import { getGenreName } from '../utils/api';
 import { MovieReviews } from './MovieReviews';
 import { ReviewForm } from './ReviewForm';
-// eslint-disable-next-line
+
 export const MovieDetail = ({ movie, onClose }) => {
+  // eslint-disable-next-line
   const [genreNames, setGenreNames] = useState('Loading...');
   const [reviewsKey, setReviewsKey] = useState(0);
 
