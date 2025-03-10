@@ -6,13 +6,20 @@ export const MovieReviews = ({ movieId, triggerRefetch }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchReviews = () => {
       try {
-        const response = await fetch(
-          `http://localhost/wp-headless/wordpress/wp-json/wp/v2/comments?post=${movieId}&order=desc`
+        // Get all reviews from localStorage
+        const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+
+        // Filter reviews for this movie
+        const movieReviews = allReviews.filter(
+          (review) => review.movieId === movieId
         );
-        const data = await response.json();
-        setReviews(data);
+
+        // Sort reviews by date (newest first)
+        movieReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        setReviews(movieReviews);
       } catch (error) {
         console.error('Error fetching reviews:', error);
       } finally {
@@ -62,10 +69,7 @@ export const MovieReviews = ({ movieId, triggerRefetch }) => {
                   </p>
                 </div>
               </div>
-              <div
-                className='text-gray-300 prose prose-sm max-w-none prose-headings:text-gray-300 prose-p:text-gray-300'
-                dangerouslySetInnerHTML={{ __html: review.content.rendered }}
-              />
+              <div className='text-gray-300'>{review.content}</div>
             </div>
           ))}
         </div>

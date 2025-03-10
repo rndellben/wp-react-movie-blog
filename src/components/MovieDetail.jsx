@@ -5,22 +5,18 @@ import { getGenreName } from '../utils/api';
 import { MovieReviews } from './MovieReviews';
 import { ReviewForm } from './ReviewForm';
 
-export const MovieDetail = ({ movie, posterUrl, onClose }) => {
+export const MovieDetail = ({ movie, onClose }) => {
   const [genreNames, setGenreNames] = useState('Loading...');
   const [reviewsKey, setReviewsKey] = useState(0);
 
   useEffect(() => {
     const fetchGenres = async () => {
-      if (!movie.acf?.genre) {
+      if (!movie.genres) {
         setGenreNames(['N/A']);
         return;
       }
 
-      const genreIds = Array.isArray(movie.acf.genre)
-        ? movie.acf.genre
-        : [movie.acf.genre];
-
-      const genrePromises = genreIds.map((id) => getGenreName(id));
+      const genrePromises = movie.genres.map((id) => getGenreName(id));
       const genreResults = await Promise.all(genrePromises);
 
       setGenreNames(genreResults);
@@ -77,56 +73,64 @@ export const MovieDetail = ({ movie, posterUrl, onClose }) => {
           <div className='flex flex-col md:flex-row'>
             <div className='md:w-5/5'>
               <img
-                src={posterUrl || 'https://via.placeholder.com/300x450'}
-                alt={movie.title.rendered}
+                src={
+                  movie.image?.original || 'https://via.placeholder.com/300x450'
+                }
+                alt={movie.name}
                 className='w-full h-[450px] object-cover'
               />
             </div>
 
             <div className='md:w-2/5 p-6'>
               <h2 className='text-3xl text-gray-500 font-bold mb-4'>
-                {movie.title.rendered}
+                {movie.name}
               </h2>
 
               <div className='space-y-4'>
                 <div className='flex items-center'>
                   <span className='text-yellow-500 text-2xl font-bold'>
-                    {movie.acf?.rating || 'N/A'}
+                    {movie.rating?.average || 'N/A'}
                   </span>
                   <span className='text-gray-600 ml-2'>/10</span>
                 </div>
 
                 <div className='space-y-2'>
                   <p className='text-gray-300'>
-                    <span className='font-semibold'>Release Date:</span>{' '}
-                    {formatDate(movie.acf?.release_date)}
+                    <span className='font-semibold'>Premiered:</span>{' '}
+                    {movie.premiered || 'N/A'}
                   </p>
                   <p className='text-gray-300'>
-                    <span className='font-semibold'>Director:</span>{' '}
-                    {movie.acf?.director || 'N/A'}
+                    <span className='font-semibold'>Network:</span>{' '}
+                    {movie.network?.name || 'N/A'}
                   </p>
                   <p className='text-gray-300'>
-                    <span className='font-semibold'>Cast:</span>{' '}
-                    {movie.acf?.cast || 'N/A'}
+                    <span className='font-semibold'>Status:</span>{' '}
+                    {movie.status || 'N/A'}
                   </p>
                   <p className='text-gray-300'>
                     <span className='font-semibold'>Genre:</span>{' '}
-                    {Array.isArray(genreNames) ? genreNames.join(', ') : 'N/A'}
+                    {movie.genres.join(', ') || 'N/A'}
                   </p>
                 </div>
 
-                {movie.acf?.trailer_url && (
+                {movie.officialSite && (
                   <a
-                    href={movie.acf.trailer_url}
+                    href={movie.officialSite}
                     target='_blank'
                     rel='noopener noreferrer'
                     className='inline-block bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors mt-4'>
-                    Watch Trailer
+                    Official Site
                   </a>
                 )}
               </div>
             </div>
           </div>
+        </div>
+        <div className='p-6'>
+          <div
+            className='prose prose-invert max-w-none'
+            dangerouslySetInnerHTML={{ __html: movie.summary }}
+          />
         </div>
         <div className='p-6 space-y-6'>
           <ReviewForm

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { fetchGenres } from '../utils/api';
 
 export const FilterBar = ({ setFilters, movies }) => {
   const [genres, setGenres] = useState([]);
@@ -13,13 +12,10 @@ export const FilterBar = ({ setFilters, movies }) => {
   });
 
   useEffect(() => {
-    // Fetch Genres using the API function
-    const getGenres = async () => {
-      const data = await fetchGenres();
-      setGenres(data);
-    };
-    getGenres();
-  }, []);
+    // Extract unique genres from movies
+    const uniqueGenres = [...new Set(movies.flatMap((movie) => movie.genres))];
+    setGenres(uniqueGenres);
+  }, [movies]);
 
   const handleFilterChange = (type, value) => {
     const newFilters = { ...selectedFilters, [type]: value };
@@ -35,8 +31,8 @@ export const FilterBar = ({ setFilters, movies }) => {
         onChange={(e) => handleFilterChange('genre', e.target.value)}>
         <option value=''>All Genres</option>
         {genres.map((genre) => (
-          <option key={genre.id} value={genre.id}>
-            {genre.name}
+          <option key={genre} value={genre}>
+            {genre}
           </option>
         ))}
       </select>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export const ReviewForm = ({ movieId, onReviewSubmitted }) => {
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth();
   const [review, setReview] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -21,34 +21,32 @@ export const ReviewForm = ({ movieId, onReviewSubmitted }) => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost/wp-headless/wordpress/wp-json/wp/v2/comments`,
-        {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
-            post: parseInt(movieId, 10), // Ensure correct ID type
-            content: review,
-            type: 'comment',
-            comment_post_ID: parseInt(movieId, 10), // Explicitly set post ID
-          }),
-        }
+      // Get existing reviews from localStorage
+      const existingReviews = JSON.parse(
+        localStorage.getItem('reviews') || '[]'
       );
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(
-          data.message || data.error || 'Failed to submit review.'
-        );
-      }
+      // Create new review
+      const newReview = {
+        id: Date.now(), // Use timestamp as unique ID
+        content: review,
+        author_name: user.username,
+        date: new Date().toISOString(),
+        movieId: movieId,
+      };
 
-      await response.json();
+      // Add new review to array
+      existingReviews.push(newReview);
+
+      // Save back to localStorage
+      localStorage.setItem('reviews', JSON.stringify(existingReviews));
+
       setSuccess('Review submitted successfully!');
       setReview('');
       if (onReviewSubmitted) onReviewSubmitted();
     } catch (error) {
       console.error('Review submission error:', error);
-      setError(error.message || 'Failed to submit review. Please try again.');
+      setError('Failed to submit review. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

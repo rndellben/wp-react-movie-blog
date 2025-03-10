@@ -21,34 +21,31 @@ export const MovieList = () => {
   }, []);
 
   const filteredMovies = useMemo(() => {
-    return movies.filter((movie) => {
+    return movies.filter((show) => {
       // Search filter
-      const matchesSearch = movie.title.rendered
+      const matchesSearch = show.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
       // Genre filter
       const matchesGenre =
         !filters.genre ||
-        (movie.acf?.genre &&
-          (Array.isArray(movie.acf.genre)
-            ? movie.acf.genre.includes(Number(filters.genre))
-            : movie.acf.genre === Number(filters.genre)));
+        show.genres.includes(filters.genre);
 
       // Year filter
-      const movieYear = movie.acf?.release_date
-        ? movie.acf.release_date.substring(0, 4)
+      const movieYear = show.premiered
+        ? new Date(show.premiered).getFullYear().toString()
         : null;
 
       const matchesYear =
         !filters.year ||
-        (movieYear && Number(movieYear) === Number(filters.year));
+        (movieYear && movieYear === filters.year);
 
       // Rating filter
       const matchesRating =
         !filters.rating ||
-        (movie.acf?.rating &&
-          parseFloat(movie.acf.rating) >= parseFloat(filters.rating));
+        (show.rating?.average &&
+          show.rating.average >= parseFloat(filters.rating));
 
       return matchesSearch && matchesGenre && matchesYear && matchesRating;
     });

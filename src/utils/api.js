@@ -1,34 +1,27 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost/wp-headless/wordpress/wp-json/wp/v2';
+const TVMAZE_API_BASE = 'https://api.tvmaze.com';
 
-export const fetchMovies = async () => {
+export const fetchMovies = async (page = 0) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/movies?_embed&acf&rest_base=genre`
-    );
-    const moviesWithGenres = response.data.map((movie) => {
-      const taxonomyGenres = movie._embedded?.['wp:term']?.[0] || [];
-      const acfGenres = movie.acf?.genre || [];
-
- 
-
-      return {
-        ...movie,
-        genres: taxonomyGenres.length > 0 ? taxonomyGenres : acfGenres,
-      };
-    });
-    return moviesWithGenres;
+    const response = await fetch(`${TVMAZE_API_BASE}/shows?page=${page}`);
+    const data = await response.json();
+    return data;
   } catch (error) {
+    console.error('Error fetching shows:', error);
     return [];
   }
 };
 
 export const fetchGenres = async () => {
+  // TVmaze doesn't have a separate genres endpoint, so we'll fetch shows
+  // and extract unique genres
   try {
-    const response = await axios.get(`${API_URL}/genre`);
-    return response.data;
+    const shows = await fetchMovies();
+    const uniqueGenres = [...new Set(shows.flatMap((show) => show.genres))];
+    return uniqueGenres.map((name, id) => ({ id, name }));
   } catch (error) {
+    console.error('Error fetching genres:', error);
     return [];
   }
 };
@@ -46,10 +39,6 @@ export const fetchMoviePoster = async (posterId) => {
 };
 
 export const getGenreName = async (genreId) => {
-  try {
-    const response = await axios.get(`${API_URL}/genre/${genreId}`); // Adjust endpoint if needed
-    return response.data.name || 'Unknown Genre'; // Return genre name
-  } catch (error) {
-    return 'Unknown Genre'; // Default if error occurs
-  }
+  const genres = await fetchGenres();
+  return genres.find((g) => g.id === genreId)?.name || 'Unknown';
 };
