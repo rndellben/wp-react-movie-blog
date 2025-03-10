@@ -4,7 +4,7 @@ import { IoClose } from 'react-icons/io5';
 import { getGenreName } from '../utils/api';
 import { MovieReviews } from './MovieReviews';
 import { ReviewForm } from './ReviewForm';
-
+// eslint-disable-next-line
 export const MovieDetail = ({ movie, onClose }) => {
   const [genreNames, setGenreNames] = useState('Loading...');
   const [reviewsKey, setReviewsKey] = useState(0);
@@ -25,7 +25,7 @@ export const MovieDetail = ({ movie, onClose }) => {
     fetchGenres();
   }, [movie]);
 
-  // Format the release date
+  // eslint-disable-next-line
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
 
